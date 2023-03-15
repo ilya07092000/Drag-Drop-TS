@@ -1,6 +1,10 @@
+import ProjectStatus from './enums/project-status';
+import Project from './project';
+import { Listener } from './types/listener';
+
 class ProjectState {
-	private listeners: any[] = [];
-	private projects: any[] = [];
+	private listeners: Listener[] = [];
+	private projects: Project[] = [];
 	private static instance: ProjectState;
 
 	private constructor() {}
@@ -15,19 +19,20 @@ class ProjectState {
 	}
 
 	addProject(title: string, description: string, numOfPeople: number) {
-		const newProject = {
-			id: Date.now(),
+		const newProject = new Project(
+			Date.now(),
 			title,
 			description,
-			people: numOfPeople,
-		};
+			numOfPeople,
+			ProjectStatus.Active
+		);
 		this.projects.push(newProject);
 		for (const listenerFn of this.listeners) {
 			listenerFn([...this.projects]);
 		}
 	}
 
-	addListener(listenerFn: Function) {
+	addListener(listenerFn: Listener) {
 		this.listeners.push(listenerFn);
 	}
 }
