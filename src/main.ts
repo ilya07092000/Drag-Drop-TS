@@ -138,4 +138,40 @@ class ProjectInput {
 
 const projectInput = new ProjectInput();
 
+class ProjectList {
+	templateElement: HTMLTemplateElement;
+	hostElement: HTMLDivElement;
+	element: HTMLElement;
+
+	constructor(private type: 'active' | 'finished' = 'active') {
+		this.templateElement = document.querySelector('#project-list')!;
+		this.hostElement = document.querySelector('#app')!;
+
+		const importedNode = document.importNode(
+			this.templateElement.content,
+			true
+		);
+		this.element = importedNode.firstElementChild as HTMLElement;
+		this.element.id = `${type}-projects`;
+
+		this.attach();
+		this.renderContent();
+	}
+
+	private renderContent() {
+		const listId = `${this.type}-projects-list`;
+		this.element.querySelector('ul')!.id = listId;
+		this.element.querySelector(
+			'h2'
+		)!.textContent = `${this.type.toUpperCase()} PROJECTS`;
+	}
+
+	private attach() {
+		this.hostElement.insertAdjacentElement('beforeend', this.element);
+	}
+}
+
+new ProjectList('active');
+new ProjectList('finished');
+
 export {};
