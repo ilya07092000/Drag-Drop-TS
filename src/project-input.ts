@@ -2,32 +2,21 @@ import { Validatable } from './types/validation';
 import { validate } from './helpers/validation';
 import { projectState } from './project-state';
 import autobind from './decorators/autobind';
+import ComponentBase from './component-base';
 
-class ProjectInput {
-	templateElement: HTMLTemplateElement;
-	hostElement: HTMLDivElement;
-	element: HTMLFormElement;
+class ProjectInput extends ComponentBase<HTMLDivElement, HTMLFormElement> {
 	titleInputElement: HTMLInputElement;
 	descriptionInputElement: HTMLInputElement;
 	peopleInputElement: HTMLInputElement;
 
 	constructor() {
-		this.templateElement = document.querySelector('#project-input')!;
-		this.hostElement = document.querySelector('#app')!;
-
-		const importedNode = document.importNode(
-			this.templateElement.content,
-			true
-		);
-		this.element = importedNode.firstElementChild as HTMLFormElement;
-		this.element.id = 'user-input';
+		super('project-input', 'app', true, 'user-input');
 
 		this.titleInputElement = this.element.querySelector('#title')!;
 		this.descriptionInputElement = this.element.querySelector('#description')!;
 		this.peopleInputElement = this.element.querySelector('#people')!;
 
 		this.configure();
-		this.attach();
 	}
 
 	private gatherUserInput(): [string, string, number] | void {
@@ -83,13 +72,11 @@ class ProjectInput {
 		}
 	}
 
-	private configure() {
+	configure() {
 		this.element.addEventListener('submit', this.submitHandler);
 	}
 
-	private attach() {
-		this.hostElement.insertAdjacentElement('afterbegin', this.element);
-	}
+	renderContent(): void {}
 }
 
 export default ProjectInput;

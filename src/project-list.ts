@@ -1,36 +1,16 @@
 import ProjectStatus from './enums/project-status';
 import Project from './project';
 import { projectState } from './project-state';
+import ComponentBase from './component-base';
 
-class ProjectList {
-	templateElement: HTMLTemplateElement;
-	hostElement: HTMLDivElement;
-	element: HTMLElement;
-	assignedProjects: Project[] = [];
+class ProjectList extends ComponentBase<HTMLDivElement, HTMLElement> {
+	assignedProjects: Project[];
 
 	constructor(private type: 'active' | 'finished' = 'active') {
-		this.templateElement = document.querySelector('#project-list')!;
-		this.hostElement = document.querySelector('#app')!;
+		super('project-list', 'app', false, `${type}-projects`);
+		this.assignedProjects = [];
 
-		const importedNode = document.importNode(
-			this.templateElement.content,
-			true
-		);
-		this.element = importedNode.firstElementChild as HTMLElement;
-		this.element.id = `${type}-projects`;
-
-		projectState.addListener((projects: Project[]) => {
-			const relevantProjects = projects.filter((project) => {
-				if (this.type === 'active') {
-					return project.status === ProjectStatus.Active;
-				}
-
-				return project.status === ProjectStatus.Finished;
-			});
-			this.assignedProjects = relevantProjects;
-			this.renderProjects();
-		});
-		this.attach();
+		this.configure();
 		this.renderContent();
 	}
 
@@ -45,7 +25,7 @@ class ProjectList {
 		}
 	}
 
-	private renderContent() {
+	renderContent() {
 		const listId = `${this.type}-projects-list`;
 		this.element.querySelector('ul')!.id = listId;
 		this.element.querySelector(
@@ -53,8 +33,18 @@ class ProjectList {
 		)!.textContent = `${this.type.toUpperCase()} PROJECTS`;
 	}
 
-	private attach() {
-		this.hostElement.insertAdjacentElement('beforeend', this.element);
+	configure(): void {
+		projectState.addListener((projects: Project[]) => {
+			const relevantProjects = projects.filter((project) => {
+				if (this.type === 'active') {
+					return project.status === ProjectStatus.Active;
+				}
+
+				return project.status === ProjectStatus.Finished;
+			});
+			this.assignedProjects = relevantProjects;
+			this.renderProjects();
+		});
 	}
 }
 
