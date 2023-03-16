@@ -2,6 +2,7 @@ import ProjectStatus from './enums/project-status';
 import Project from './project';
 import { projectState } from './project-state';
 import ComponentBase from './component-base';
+import ProjectItem from './project-item';
 
 class ProjectList extends ComponentBase<HTMLDivElement, HTMLElement> {
 	assignedProjects: Project[];
@@ -18,10 +19,7 @@ class ProjectList extends ComponentBase<HTMLDivElement, HTMLElement> {
 		const listEl = document.getElementById(`${this.type}-projects-list`)!;
 		listEl.innerHTML = '';
 		for (const projectItem of this.assignedProjects) {
-			const listItem = document.createElement('li');
-			listItem.textContent = projectItem.title;
-
-			listEl.appendChild(listItem);
+			new ProjectItem(this.element.querySelector('ul')!.id, projectItem);
 		}
 	}
 
