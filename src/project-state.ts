@@ -27,13 +27,26 @@ class ProjectState {
 			ProjectStatus.Active
 		);
 		this.projects.push(newProject);
-		for (const listenerFn of this.listeners) {
-			listenerFn([...this.projects]);
-		}
+		this.updateListeners();
 	}
 
 	addListener(listenerFn: Listener) {
 		this.listeners.push(listenerFn);
+	}
+
+	switchProjectStatus(projectId: number, newStatus: ProjectStatus) {
+		const currProject = this.projects.find((pr) => pr.id === projectId);
+
+		if (currProject) {
+			currProject.status = newStatus;
+			this.updateListeners();
+		}
+	}
+
+	private updateListeners() {
+		for (const listenerFn of this.listeners) {
+			listenerFn([...this.projects]);
+		}
 	}
 }
 

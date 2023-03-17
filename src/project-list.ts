@@ -3,8 +3,13 @@ import Project from './project';
 import { projectState } from './project-state';
 import ComponentBase from './component-base';
 import ProjectItem from './project-item';
+import { DragTarget } from './types/drag-drop';
+import autobind from './decorators/autobind';
 
-class ProjectList extends ComponentBase<HTMLDivElement, HTMLElement> {
+class ProjectList
+	extends ComponentBase<HTMLDivElement, HTMLElement>
+	implements DragTarget
+{
 	assignedProjects: Project[];
 
 	constructor(private type: 'active' | 'finished' = 'active') {
@@ -13,6 +18,32 @@ class ProjectList extends ComponentBase<HTMLDivElement, HTMLElement> {
 
 		this.configure();
 		this.renderContent();
+	}
+
+	@autobind
+	dragOverHandler(event: DragEvent): void {
+		if (event.dataTransfer && event.dataTransfer.types[0] === 'text/plain') {
+			event.preventDefault();
+			const listEl = this.element.querySelector('ul')!;
+			listEl.classList.add('droppable');
+		}
+	}
+
+	@autobind
+	dropHandler(this: HTMLElement, event: DragEvent): void {
+		const projectId = +event.dataTransfer!.getData('text/plain');
+		projectState.switchProjectStatus(
+			projectId,
+			(this as unknown as ProjectList).type === 'active'
+				? ProjectStatus.Active
+				: ProjectStatus.Finished
+		);
+	}
+
+	@autobind
+	dragLeaveHandler(_: DragEvent): void {
+		const listEl = this.element.querySelector('ul')!;
+		listEl.classList.remove('droppable');
 	}
 
 	private renderProjects() {
@@ -32,6 +63,10 @@ class ProjectList extends ComponentBase<HTMLDivElement, HTMLElement> {
 	}
 
 	configure(): void {
+		this.element.addEventListener('dragover', this.dragOverHandler);
+		this.element.addEventListener('dragleave', this.dragLeaveHandler);
+		this.element.addEventListener('drop', this.dropHandler);
+
 		projectState.addListener((projects: Project[]) => {
 			const relevantProjects = projects.filter((project) => {
 				if (this.type === 'active') {
